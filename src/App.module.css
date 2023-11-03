@@ -1,0 +1,24 @@
+.topnav {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  background: rgba(49, 49, 49, 1);
+  gap: 10px;
+}
+
+.content {
+  display: flex;  
+  height: 100vh;
+}
+
+.stock, .foundation {
+  min-width: 100px;
+  flex-grow: 1;
+  background-color: rgba(43, 123, 59, 1);
+}
+
+.tableau {
+  flex-grow: 7;
+  background-color: rgba(52, 162, 73, 1);
+}

@@ -1,5 +1,9 @@
+import { Dispatch } from 'react';
 import Card from './models/card';
 import Move from './models/move';
+
+export type CardType = Card;
+export type MoveType = Move;
 
 export enum Pile {
   STOCK = 0,
@@ -29,3 +33,5 @@ export interface GameAction {
   type: GameActionType;
   payload: unknown;
 }
+
+export type GameContextType = [GameState, Dispatch<GameAction>] | null;

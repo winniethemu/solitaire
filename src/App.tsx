@@ -1,23 +1,23 @@
-import { GameProvider } from './contexts/GameContext';
+import Tableau from './components/Tableau/Tableau';
 
-import './App.css';
+import styles from './App.module.css';
 
 function App() {
   return (
-    <GameProvider>
-      <div className="container">
-        <nav className="topnav">
-          <h1>Solitaire</h1>
-          <button>Undo</button>
-          <button>Reset</button>
-        </nav>
-        <main className="content">
-          <section className="stock"></section>
-          <section className="tableau"></section>
-          <section className="foundation"></section>
-        </main>
-      </div>
-    </GameProvider>
+    <div className={styles.container}>
+      <nav className={styles.topnav}>
+        <h1>Solitaire</h1>
+        <button>Undo</button>
+        <button>Reset</button>
+      </nav>
+      <main className={styles.content}>
+        <section className={styles.stock}></section>
+        <section className={styles.tableau}>
+          <Tableau />
+        </section>
+        <section className={styles.foundation}></section>
+      </main>
+    </div>
   );
 }
 
