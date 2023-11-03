@@ -9,7 +9,7 @@ type CardProps = {
 export default function Card({ data }: CardProps) {
   return (
     <div className={styles.container}>
-      {data.suitSymbol} {data.valueSymbol}
+      {data.revealed ? `${data.suitSymbol} ${data.valueSymbol}` : null}
     </div>
   );
 }
