@@ -7,5 +7,9 @@ type CardProps = {
 };
 
 export default function Card({ data }: CardProps) {
-  return <div className={styles.container}>{data.value}</div>;
+  return (
+    <div className={styles.container}>
+      {data.suitSymbol} {data.valueSymbol}
+    </div>
+  );
 }
