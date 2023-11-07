@@ -1,3 +1,6 @@
+import React from 'react';
+import { Droppable, Draggable } from '@hello-pangea/dnd';
+
 import { useGameState } from '../../contexts/GameContext';
 import { CardType } from '../../type';
 import Card from '../Card/Card';
@@ -21,12 +24,26 @@ type TableauColumnProps = {
 };
 
 function TableauColumn({ cards }: TableauColumnProps) {
+  const droppableId = React.useId();
   return (
-    <div className={styles.columnContainer}>
-      {cards.map((card) => {
-        const id = `${card.suit}:${card.value}`;
-        return <Card key={id} data={card} />;
-      })}
-    </div>
+    <Droppable droppableId={droppableId}>
+      {(provided, snapshot) => (
+        <div ref={provided.innerRef} className={styles.columnContainer}>
+          {cards.map((card, index) => (
+            <Draggable key={card.id} draggableId={card.id} index={index}>
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                >
+                  <Card data={card} />
+                </div>
+              )}
+            </Draggable>
+          ))}
+        </div>
+      )}
+    </Droppable>
   );
 }
