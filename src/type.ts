@@ -28,10 +28,15 @@ export interface GameState {
 }
 
 export type GameActionType = 'move' | 'reset';
+export type GameAction = MoveAction | ResetAction;
 
-export interface GameAction {
-  type: GameActionType;
-  payload: unknown;
+export interface MoveAction {
+  type: 'move';
+  payload: Move;
+}
+
+export interface ResetAction {
+  type: 'reset';
 }
 
 export type GameContextType = [GameState, Dispatch<GameAction>] | null;
