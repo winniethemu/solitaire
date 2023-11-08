@@ -1,12 +1,12 @@
-import { DragDropContext } from '@hello-pangea/dnd';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 
 import Tableau from './components/Tableau/Tableau';
 
 import styles from './App.module.css';
 
 function App() {
-  function handleDragEnd(result) {
-    /* TODO */
+  function handleDragEnd(result: DropResult) {
+    console.log(result);
   }
 
   return (

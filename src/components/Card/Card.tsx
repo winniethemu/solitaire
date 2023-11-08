@@ -11,8 +11,8 @@ type CardProps = {
 
 export default function Card({ data, index }: CardProps) {
   return (
-    <Draggable key={data.id} draggableId={data.id} index={index}>
-      {(provided, snapshot) => (
+    <Draggable draggableId={data.id} index={index}>
+      {(provided) => (
         <div
           className={styles.container}
           ref={provided.innerRef}

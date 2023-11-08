@@ -1,4 +1,3 @@
-import React from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 
 import { useGameState } from '../../contexts/GameContext';
@@ -8,12 +7,12 @@ import Card from '../Card/Card';
 import styles from './Tableau.module.css';
 
 export default function Tableau() {
-  const [state, dispatch] = useGameState();
+  const [state] = useGameState();
 
   return (
     <div className={styles.tableauContainer}>
       {state.tableau.map((column, index) => (
-        <TableauColumn key={index} cards={column} />
+        <TableauColumn key={index} cards={column} index={index} />
       ))}
     </div>
   );
@@ -21,21 +20,22 @@ export default function Tableau() {
 
 type TableauColumnProps = {
   cards: CardType[];
+  index: number;
 };
 
-function TableauColumn({ cards }: TableauColumnProps) {
-  const droppableId = React.useId();
+function TableauColumn({ cards, index }: TableauColumnProps) {
   return (
-    <Droppable droppableId={droppableId}>
-      {(provided, snapshot) => (
+    <Droppable droppableId={`${index}`}>
+      {(provided) => (
         <div
           ref={provided.innerRef}
           className={styles.columnContainer}
           {...provided.droppableProps}
         >
           {cards.map((card, index) => (
-            <Card data={card} index={index} />
+            <Card key={card.id} data={card} index={index} />
           ))}
+          {provided.placeholder}
         </div>
       )}
     </Droppable>
