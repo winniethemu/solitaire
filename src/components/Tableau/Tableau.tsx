@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droppable, Draggable } from '@hello-pangea/dnd';
+import { Droppable } from '@hello-pangea/dnd';
 
 import { useGameState } from '../../contexts/GameContext';
 import { CardType } from '../../type';
@@ -28,19 +28,13 @@ function TableauColumn({ cards }: TableauColumnProps) {
   return (
     <Droppable droppableId={droppableId}>
       {(provided, snapshot) => (
-        <div ref={provided.innerRef} className={styles.columnContainer}>
+        <div
+          ref={provided.innerRef}
+          className={styles.columnContainer}
+          {...provided.droppableProps}
+        >
           {cards.map((card, index) => (
-            <Draggable key={card.id} draggableId={card.id} index={index}>
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                >
-                  <Card data={card} />
-                </div>
-              )}
-            </Draggable>
+            <Card data={card} index={index} />
           ))}
         </div>
       )}
