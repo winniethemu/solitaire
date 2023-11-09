@@ -1,23 +1,28 @@
+import { DraggableLocation } from '@hello-pangea/dnd';
 import { GameState, PileArea } from '../type';
 import { diffColor, getCardDetail, getPileDetail } from '../util';
 
 export default class Move {
-  sourceId: string;
-  destId: string;
-  cardIds: string[];
+  source: DraggableLocation;
+  destination: DraggableLocation;
+  cardId: string;
 
-  constructor(sourceId: string, destId: string, cardIds: string[]) {
-    this.sourceId = sourceId;
-    this.destId = destId;
-    this.cardIds = cardIds;
+  constructor(
+    source: DraggableLocation,
+    destination: DraggableLocation,
+    cardId: string
+  ) {
+    this.source = source;
+    this.destination = destination;
+    this.cardId = cardId;
   }
 
   isValid(state: GameState): boolean {
-    if (this.sourceId == null || this.destId == null) return false;
-    if (this.cardIds.length < 1) return false;
+    if (this.source == null || this.destination == null) return false;
+    if (!this.cardId) return false;
 
-    const [sourceSuit, sourceValue] = getCardDetail(this.cardIds[0]);
-    const [dest, pile] = getPileDetail(this.destId, state);
+    const [sourceSuit, sourceValue] = getCardDetail(this.cardId);
+    const [dest, pile] = getPileDetail(this.destination.droppableId, state);
 
     if (dest === PileArea.FOUNDATION) {
       /**

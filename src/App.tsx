@@ -10,12 +10,11 @@ function App() {
   const [state, dispatch] = useGameState();
 
   function handleDragEnd(result: DropResult) {
+    console.log(result); // TODO: remove
     const { source, destination, draggableId } = result;
     if (!destination) return;
 
-    const move = new Move(source.droppableId, destination.droppableId, [
-      draggableId,
-    ]);
+    const move = new Move(source, destination, draggableId);
 
     if (move.isValid(state)) {
       dispatch({
