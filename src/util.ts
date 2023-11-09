@@ -44,10 +44,25 @@ export function initGame(): GameState {
   }
 
   return {
-    foundation: [],
+    foundation: [[], [], [], []],
     history: [],
     stock,
     tableau,
     waste: [],
   };
+}
+
+export function getCardDetail(id: string): [number, number] {
+  const [suit, value] = id.split(':');
+  return [Number(suit), Number(value)];
+}
+
+export function getPileDetail(id: string, state: GameState): [string, Card[]] {
+  const [name, index] = id.split(':');
+  const pile = state[name][Number(index)];
+  return [name, pile];
+}
+
+export function diffColor(suit1: number, suit2: number): boolean {
+  return suit1 % 2 !== suit2 % 2;
 }

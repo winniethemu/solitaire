@@ -1,7 +1,7 @@
 import { Droppable } from '@hello-pangea/dnd';
 
 import { useGameState } from '../../contexts/GameContext';
-import { CardType } from '../../type';
+import { CardType, PileArea } from '../../type';
 import Card from '../Card/Card';
 
 import styles from './Tableau.module.css';
@@ -24,8 +24,10 @@ type TableauColumnProps = {
 };
 
 function TableauColumn({ cards, index }: TableauColumnProps) {
+  const droppableId = `${PileArea.TABLEAU}:${index}`;
+
   return (
-    <Droppable droppableId={`${index}`}>
+    <Droppable droppableId={droppableId}>
       {(provided) => (
         <div
           ref={provided.innerRef}

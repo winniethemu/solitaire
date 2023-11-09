@@ -5,11 +5,11 @@ import Move from './models/move';
 export type CardType = Card;
 export type MoveType = Move;
 
-export enum Pile {
-  STOCK = 0,
-  WASTE = 1,
-  TABLEAU = 2,
-  FOUNDATION = 3,
+export enum PileArea {
+  STOCK = 'stock',
+  WASTE = 'waste',
+  TABLEAU = 'tableau',
+  FOUNDATION = 'foundation',
 }
 
 export enum Suit {
