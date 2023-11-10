@@ -1,6 +1,6 @@
 import React from 'react';
-import { GameAction, GameContextType, GameState } from '../type';
-import { initGame } from '../util';
+import { GameAction, GameContextType, GameState, PileArea } from '../type';
+import { getPileDetail, initGame } from '../util';
 
 const GameContext = React.createContext<GameContextType>(null);
 GameContext.displayName = 'GameContext';
@@ -8,7 +8,16 @@ GameContext.displayName = 'GameContext';
 function reducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'move': {
-      return state;
+      const { source, destination } = action.payload;
+      const [srcName, srcIndex] = source.droppableId.split(':');
+      const [destName, destIndex] = destination.droppableId.split(':');
+      const nextState = { ...state };
+      let srcPile = nextState[srcName as PileArea][Number(srcIndex)];
+      let destPile = nextState[destName as PileArea][Number(destIndex)];
+      const moving = srcPile.slice(source.index);
+      nextState[srcName][Number(srcIndex)] = srcPile.slice(0, source.index);
+      destPile.splice(destination.index, 0, ...moving);
+      return nextState;
     }
     case 'reset': {
       // FIXME
