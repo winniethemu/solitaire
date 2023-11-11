@@ -17,6 +17,7 @@ export default class Move {
     this.cardId = cardId;
   }
 
+  // TODO: trying to move an unrevealed card should be invalid
   isValid(state: GameState): boolean {
     if (this.source == null || this.destination == null) return false;
     if (!this.cardId) return false;
