@@ -19,14 +19,25 @@ export enum Suit {
   DIAMOND = 3,
 }
 
-// TODO: separate out each pile (e.g. tableau1, tableau2 etc) so as to avoid
-// spliting a string key
 export interface GameState {
-  foundation: Array<Card[]>;
-  history: Array<Move>;
-  stock: Array<Card>;
-  tableau: Array<Card[]>;
-  waste: Array<Card>;
+  foundation1: Card[];
+  foundation2: Card[];
+  foundation3: Card[];
+  foundation4: Card[];
+
+  tableau1: Card[];
+  tableau2: Card[];
+  tableau3: Card[];
+  tableau4: Card[];
+  tableau5: Card[];
+  tableau6: Card[];
+  tableau7: Card[];
+
+  history: Move[];
+  stock: Card[];
+  waste: Card[];
+
+  [key: string]: Card[] | Move[];
 }
 
 export type GameActionType = 'move' | 'reset';

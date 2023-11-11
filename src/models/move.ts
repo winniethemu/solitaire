@@ -1,6 +1,6 @@
 import { DraggableLocation } from '@hello-pangea/dnd';
-import { GameState, PileArea } from '../type';
-import { diffColor, getCardDetail, getPileDetail } from '../util';
+import { CardType, GameState, PileArea } from '../type';
+import { diffColor, getCardDetail } from '../util';
 
 export default class Move {
   source: DraggableLocation;
@@ -23,9 +23,10 @@ export default class Move {
     if (!this.cardId) return false;
 
     const [sourceSuit, sourceValue] = getCardDetail(this.cardId);
-    const [dest, pile] = getPileDetail(this.destination.droppableId, state);
+    const dest = this.destination.droppableId;
+    const pile = state[dest] as CardType[];
 
-    if (dest === PileArea.FOUNDATION) {
+    if (dest.startsWith(PileArea.FOUNDATION)) {
       /**
        * We either put
        * 1) A on an empty pile, or
@@ -37,7 +38,7 @@ export default class Move {
         const [destSuit, destValue] = getCardDetail(pile[0].id);
         return sourceSuit === destSuit && sourceValue === destValue + 1;
       }
-    } else if (dest === PileArea.TABLEAU) {
+    } else if (dest.startsWith(PileArea.TABLEAU)) {
       /**
        * source must be the value-1 card in a different color
        */

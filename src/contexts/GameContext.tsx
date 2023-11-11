@@ -1,5 +1,5 @@
 import React from 'react';
-import { GameAction, GameContextType, GameState, PileArea } from '../type';
+import { CardType, GameAction, GameContextType, GameState } from '../type';
 import { initGame } from '../util';
 
 const GameContext = React.createContext<GameContextType>(null);
@@ -9,14 +9,13 @@ function reducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'move': {
       const { source, destination } = action.payload;
-      const [srcName, srcIndex] = source.droppableId.split(':');
-      const [destName, destIndex] = destination.droppableId.split(':');
       const nextState = { ...state };
-      const srcPile = nextState[srcName as PileArea][Number(srcIndex)];
-      const destPile = nextState[destName as PileArea][Number(destIndex)];
+      const srcPile = nextState[source.droppableId] as CardType[];
+      const destPile = nextState[destination.droppableId].slice() as CardType[];
       const moving = srcPile.slice(source.index);
-      nextState[srcName][Number(srcIndex)] = srcPile.slice(0, source.index);
+      nextState[source.droppableId] = srcPile.slice(0, source.index);
       destPile.splice(destination.index, 0, ...moving);
+      nextState[destination.droppableId] = destPile;
       return nextState;
     }
     case 'reset': {

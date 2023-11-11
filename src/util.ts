@@ -44,10 +44,19 @@ export function initGame(): GameState {
   }
 
   return {
-    foundation: [[], [], [], []],
+    foundation1: [],
+    foundation2: [],
+    foundation3: [],
+    foundation4: [],
+    tableau1: tableau[0],
+    tableau2: tableau[1],
+    tableau3: tableau[2],
+    tableau4: tableau[3],
+    tableau5: tableau[4],
+    tableau6: tableau[5],
+    tableau7: tableau[6],
     history: [],
     stock,
-    tableau,
     waste: [],
   };
 }
@@ -55,12 +64,6 @@ export function initGame(): GameState {
 export function getCardDetail(id: string): [number, number] {
   const [suit, value] = id.split(':');
   return [Number(suit), Number(value)];
-}
-
-export function getPileDetail(id: string, state: GameState): [string, Card[]] {
-  const [name, index] = id.split(':');
-  const pile = state[name][Number(index)];
-  return [name, pile];
 }
 
 export function diffColor(suit1: number, suit2: number): boolean {
