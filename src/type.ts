@@ -5,11 +5,11 @@ import Move from './models/move';
 export type CardType = Card;
 export type MoveType = Move;
 
-export enum Pile {
-  STOCK = 0,
-  WASTE = 1,
-  TABLEAU = 2,
-  FOUNDATION = 3,
+export enum PileArea {
+  STOCK = 'stock',
+  WASTE = 'waste',
+  TABLEAU = 'tableau',
+  FOUNDATION = 'foundation',
 }
 
 export enum Suit {
@@ -20,11 +20,24 @@ export enum Suit {
 }
 
 export interface GameState {
-  foundation: Array<Card[]>;
-  history: Array<Move>;
-  stock: Array<Card>;
-  tableau: Array<Card[]>;
-  waste: Array<Card>;
+  foundation1: Card[];
+  foundation2: Card[];
+  foundation3: Card[];
+  foundation4: Card[];
+
+  tableau1: Card[];
+  tableau2: Card[];
+  tableau3: Card[];
+  tableau4: Card[];
+  tableau5: Card[];
+  tableau6: Card[];
+  tableau7: Card[];
+
+  history: Move[];
+  stock: Card[];
+  waste: Card[];
+
+  [key: string]: Card[] | Move[];
 }
 
 export type GameActionType = 'move' | 'reset';

@@ -11,6 +11,10 @@ export default class Card {
     this.revealed = revealed;
   }
 
+  get id() {
+    return `${this.suit}:${this.value}`;
+  }
+
   get valueSymbol() {
     const symbols: Record<number, string> = {
       1: 'A',

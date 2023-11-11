@@ -1,8 +1,29 @@
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
+
 import Tableau from './components/Tableau/Tableau';
 
 import styles from './App.module.css';
+import { useGameState } from './contexts/GameContext';
+import Move from './models/move';
 
 function App() {
+  const [state, dispatch] = useGameState();
+
+  function handleDragEnd(result: DropResult) {
+    console.log(result); // TODO: remove
+    const { source, destination, draggableId } = result;
+    if (!destination) return;
+
+    const move = new Move(source, destination, draggableId);
+
+    if (move.isValid(state)) {
+      dispatch({
+        type: 'move',
+        payload: move,
+      });
+    }
+  }
+
   return (
     <div className={styles.container}>
       <nav className={styles.topnav}>
@@ -11,11 +32,13 @@ function App() {
         <button>Reset</button>
       </nav>
       <main className={styles.content}>
-        <section className={styles.stock}></section>
-        <section className={styles.tableau}>
-          <Tableau />
-        </section>
-        <section className={styles.foundation}></section>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <section className={styles.stock}></section>
+          <section className={styles.tableau}>
+            <Tableau />
+          </section>
+          <section className={styles.foundation}></section>
+        </DragDropContext>
       </main>
     </div>
   );
