@@ -5,6 +5,7 @@ import Tableau from './components/Tableau/Tableau';
 import styles from './App.module.css';
 import { useGameState } from './contexts/GameContext';
 import Move from './models/move';
+import useMouseSensor from './dnd/useMouseSensor';
 
 function App() {
   const [state, dispatch] = useGameState();
@@ -32,7 +33,11 @@ function App() {
         <button>Reset</button>
       </nav>
       <main className={styles.content}>
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DragDropContext
+          onDragEnd={handleDragEnd}
+          enableDefaultSensors={false}
+          sensors={[useMouseSensor]}
+        >
           <section className={styles.stock}></section>
           <section className={styles.tableau}>
             <Tableau />
