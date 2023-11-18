@@ -1,22 +1,66 @@
 import React from 'react';
-import { SensorAPI } from '@hello-pangea/dnd';
+import { PreDragActions, SensorAPI } from '@hello-pangea/dnd';
 
-import { useGameState } from '../contexts/GameContext';
+enum DragPhase {
+  IDLE = 'IDLE',
+  PENDING = 'PENDING',
+  DRAGGING = 'DRAGGING',
+  COMPLETE = 'COMPLETE',
+}
 
 export default function useMouseSensor(api: SensorAPI) {
-  const [state] = useGameState();
+  const phaseRef = React.useRef(DragPhase.IDLE);
 
-  function start() {
-    const preDrag = api.tryGetLock(state.tableau1[0].id);
-    if (!preDrag) return;
+  const startPendingDrag = React.useCallback(
+    (event: MouseEvent, actions: PreDragActions) => {
+      phaseRef.current = DragPhase.PENDING;
+      const drag = actions.fluidLift({ x: event.clientX, y: event.clientY });
 
-    const drag = preDrag.snapLift();
-    drag.moveDown();
-    drag.drop();
-  }
+      window.addEventListener(
+        'mousemove',
+        function onMouseMove(moveEvent: MouseEvent) {
+          drag.move({ x: moveEvent.clientX, y: moveEvent.clientY });
+        }
+      );
 
-  React.useEffect(() => {
-    window.addEventListener('click', start);
-    return () => window.removeEventListener('click', start);
-  }, []);
+      window.addEventListener(
+        'mousedown',
+        function onMouseMove(downEvent: MouseEvent) {
+          // cancel
+        }
+      );
+
+      window.addEventListener(
+        'mouseup',
+        function onMouseMove(upEvent: MouseEvent) {
+          drag.drop();
+        }
+      );
+    },
+    []
+  );
+
+  const onInitialMouseDown = React.useCallback(
+    (event: MouseEvent) => {
+      if (phaseRef.current !== DragPhase.IDLE) {
+        // cancel
+      }
+
+      const draggableId = api.findClosestDraggableId(event);
+      if (!draggableId) return;
+      const preDrag = api.tryGetLock(draggableId);
+      if (!preDrag) return;
+
+      window.removeEventListener('mousedown', onInitialMouseDown);
+      startPendingDrag(event, preDrag);
+    },
+    [api, startPendingDrag]
+  );
+
+  React.useLayoutEffect(() => {
+    window.addEventListener('mousedown', onInitialMouseDown);
+    return () => {
+      window.removeEventListener('mousedown', onInitialMouseDown);
+    };
+  }, [onInitialMouseDown]);
 }
