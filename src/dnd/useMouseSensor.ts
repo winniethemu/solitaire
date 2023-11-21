@@ -74,6 +74,7 @@ export default function useMouseSensor(api: SensorAPI) {
       unbindUpRef.current = bindEvent(window, 'mouseup', handleMouseUp);
 
       function handleMouseMove(moveEvent: MouseEvent) {
+        moveEvent.preventDefault();
         const { name, actions } = phaseRef.current;
         if (name === 'DRAGGING') {
           actions.move({ x: moveEvent.clientX, y: moveEvent.clientY });
@@ -93,9 +94,10 @@ export default function useMouseSensor(api: SensorAPI) {
         };
       }
 
-      function handleMouseUp() {
+      function handleMouseUp(upEvent: MouseEvent) {
         const { name, actions } = phaseRef.current;
         if (name === 'DRAGGING') {
+          upEvent.preventDefault();
           actions.drop();
           reset();
         } else {
