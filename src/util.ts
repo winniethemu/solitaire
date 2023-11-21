@@ -4,6 +4,8 @@ import { GameState } from './type';
 // A = 1, J = 11, Q = 12, K = 13
 const values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
+const SLOPPY_CLICK_THRESHOLD = 5;
+
 function createDeck(): Card[] {
   const deck = [];
   for (let suit = 0; suit < 4; suit++) {
@@ -79,4 +81,10 @@ export function bindEvent(
   return function unbind() {
     target.removeEventListener(eventName, handler);
   };
+}
+
+export function sloppyClick(sourceEvent: MouseEvent, targetEvent: MouseEvent) {
+  const [x0, y0] = [sourceEvent.clientX, sourceEvent.clientY];
+  const [x1, y1] = [targetEvent.clientX, targetEvent.clientY];
+  return Math.abs(x0 - x1) < 5 && Math.abs(y0 - y1) < SLOPPY_CLICK_THRESHOLD;
 }

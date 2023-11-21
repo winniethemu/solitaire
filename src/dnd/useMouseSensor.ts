@@ -1,6 +1,6 @@
 import React from 'react';
 import { FluidDragActions, PreDragActions, SensorAPI } from '@hello-pangea/dnd';
-import { bindEvent } from '../util';
+import { bindEvent, sloppyClick } from '../util';
 
 interface Idle {
   name: 'IDLE';
@@ -20,12 +20,29 @@ type DragPhase = Idle | Pending | Dragging;
 
 export default function useMouseSensor(api: SensorAPI) {
   const phaseRef = React.useRef<DragPhase>({ name: 'IDLE' });
-  const unbindRef = React.useRef<() => void>(() => {});
+  const unbindDownRef = React.useRef(() => {});
+  const unbindMoveRef = React.useRef(() => {});
+  const unbindUpRef = React.useRef(() => {});
 
   // eslint-disable-next-line
-  let cancel: () => void, onIdle: () => void;
+  let onIdle: () => void;
 
-  cancel = React.useCallback(
+  function unbindAll() {
+    unbindDownRef.current();
+    unbindUpRef.current();
+    unbindMoveRef.current();
+  }
+
+  const reset = React.useCallback(
+    function reset() {
+      unbindAll();
+      phaseRef.current = { name: 'IDLE' };
+      onIdle();
+    },
+    [onIdle]
+  );
+
+  const cancel = React.useCallback(
     function cancel() {
       const phase = phaseRef.current;
       if (phase.name === 'IDLE') {
@@ -36,11 +53,9 @@ export default function useMouseSensor(api: SensorAPI) {
         // DRAGGING
         phase.actions.cancel();
       }
-      phaseRef.current = { name: 'IDLE' };
-      unbindRef.current();
-      onIdle();
+      reset();
     },
-    [onIdle]
+    [reset]
   );
 
   /**
@@ -50,36 +65,45 @@ export default function useMouseSensor(api: SensorAPI) {
    * 3. lock acquired
    */
   const onPending = React.useCallback(
-    function onPending(event: MouseEvent, actions: PreDragActions) {
+    function onPending(downEvent: MouseEvent, actions: PreDragActions) {
       phaseRef.current = {
         name: 'PENDING',
         actions,
       };
-      const drag = actions.fluidLift({ x: event.clientX, y: event.clientY });
+      unbindMoveRef.current = bindEvent(window, 'mousemove', handleMouseMove);
+      unbindUpRef.current = bindEvent(window, 'mouseup', handleMouseUp);
 
-      window.addEventListener(
-        'mousemove',
-        function handleMouseMove(event: MouseEvent) {
-          unbindRef.current = bindEvent(window, 'mousemove', handleMouseMove);
-          phaseRef.current = {
-            name: 'DRAGGING',
-            actions: drag,
-          };
-          drag.move({ x: event.clientX, y: event.clientY });
+      function handleMouseMove(moveEvent: MouseEvent) {
+        const { name, actions } = phaseRef.current;
+        if (name === 'DRAGGING') {
+          actions.move({ x: moveEvent.clientX, y: moveEvent.clientY });
+          return;
         }
-      );
 
-      window.addEventListener('mouseup', function handleMouseUp() {
-        if (phaseRef.current.name === 'DRAGGING') {
-          drag.drop();
+        if (sloppyClick(downEvent, moveEvent)) return;
+
+        const drag = actions.fluidLift({
+          x: downEvent.clientX,
+          y: downEvent.clientY,
+        });
+
+        phaseRef.current = {
+          name: 'DRAGGING',
+          actions: drag,
+        };
+      }
+
+      function handleMouseUp() {
+        const { name, actions } = phaseRef.current;
+        if (name === 'DRAGGING') {
+          actions.drop();
+          reset();
         } else {
           cancel();
         }
-        phaseRef.current.name = 'IDLE';
-        unbindRef.current();
-      });
+      }
     },
-    [cancel]
+    [cancel, reset]
   );
 
   onIdle = React.useCallback(
@@ -88,6 +112,7 @@ export default function useMouseSensor(api: SensorAPI) {
         const phase = phaseRef.current;
         if (phase.name !== 'IDLE') {
           cancel();
+          return;
         }
 
         const draggableId = api.findClosestDraggableId(event);
@@ -98,13 +123,13 @@ export default function useMouseSensor(api: SensorAPI) {
         onPending(event, preDrag);
       }
 
-      unbindRef.current = bindEvent(window, 'mousedown', handleMouseDown);
+      unbindDownRef.current = bindEvent(window, 'mousedown', handleMouseDown);
     },
     [api, cancel, onPending]
   );
 
   React.useLayoutEffect(() => {
     onIdle();
-    return () => unbindRef.current();
+    return () => unbindAll();
   }, [onIdle]);
 }
