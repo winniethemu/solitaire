@@ -1,66 +1,110 @@
 import React from 'react';
-import { PreDragActions, SensorAPI } from '@hello-pangea/dnd';
+import { FluidDragActions, PreDragActions, SensorAPI } from '@hello-pangea/dnd';
+import { bindEvent } from '../util';
 
-enum DragPhase {
-  IDLE = 'IDLE',
-  PENDING = 'PENDING',
-  DRAGGING = 'DRAGGING',
-  COMPLETE = 'COMPLETE',
+interface Idle {
+  name: 'IDLE';
 }
 
-export default function useMouseSensor(api: SensorAPI) {
-  const phaseRef = React.useRef(DragPhase.IDLE);
+interface Pending {
+  name: 'PENDING';
+  actions: PreDragActions;
+}
 
-  const startPendingDrag = React.useCallback(
-    (event: MouseEvent, actions: PreDragActions) => {
-      phaseRef.current = DragPhase.PENDING;
+interface Dragging {
+  name: 'DRAGGING';
+  actions: FluidDragActions;
+}
+
+type DragPhase = Idle | Pending | Dragging;
+
+export default function useMouseSensor(api: SensorAPI) {
+  const phaseRef = React.useRef<DragPhase>({ name: 'IDLE' });
+  const unbindRef = React.useRef<() => void>(() => {});
+
+  // eslint-disable-next-line
+  let cancel: () => void, onIdle: () => void;
+
+  cancel = React.useCallback(
+    function cancel() {
+      const phase = phaseRef.current;
+      if (phase.name === 'IDLE') {
+        return;
+      } else if (phase.name === 'PENDING') {
+        phase.actions.abort();
+      } else {
+        // DRAGGING
+        phase.actions.cancel();
+      }
+      phaseRef.current = { name: 'IDLE' };
+      unbindRef.current();
+      onIdle();
+    },
+    [onIdle]
+  );
+
+  /**
+   * Pre-condition:
+   * 1. mousedown detected
+   * 2. draggable element found
+   * 3. lock acquired
+   */
+  const onPending = React.useCallback(
+    function onPending(event: MouseEvent, actions: PreDragActions) {
+      phaseRef.current = {
+        name: 'PENDING',
+        actions,
+      };
       const drag = actions.fluidLift({ x: event.clientX, y: event.clientY });
 
       window.addEventListener(
         'mousemove',
-        function onMouseMove(moveEvent: MouseEvent) {
-          drag.move({ x: moveEvent.clientX, y: moveEvent.clientY });
+        function handleMouseMove(event: MouseEvent) {
+          unbindRef.current = bindEvent(window, 'mousemove', handleMouseMove);
+          phaseRef.current = {
+            name: 'DRAGGING',
+            actions: drag,
+          };
+          drag.move({ x: event.clientX, y: event.clientY });
         }
       );
 
-      window.addEventListener(
-        'mousedown',
-        function onMouseMove(downEvent: MouseEvent) {
-          // cancel
-        }
-      );
-
-      window.addEventListener(
-        'mouseup',
-        function onMouseMove(upEvent: MouseEvent) {
+      window.addEventListener('mouseup', function handleMouseUp() {
+        if (phaseRef.current.name === 'DRAGGING') {
           drag.drop();
+        } else {
+          cancel();
         }
-      );
+        phaseRef.current.name = 'IDLE';
+        unbindRef.current();
+      });
     },
-    []
+    [cancel]
   );
 
-  const onInitialMouseDown = React.useCallback(
-    (event: MouseEvent) => {
-      if (phaseRef.current !== DragPhase.IDLE) {
-        // cancel
+  onIdle = React.useCallback(
+    function onIdle() {
+      function handleMouseDown(event: MouseEvent) {
+        const phase = phaseRef.current;
+        if (phase.name !== 'IDLE') {
+          cancel();
+        }
+
+        const draggableId = api.findClosestDraggableId(event);
+        if (!draggableId) return;
+        const preDrag = api.tryGetLock(draggableId);
+        if (!preDrag) return;
+
+        onPending(event, preDrag);
       }
 
-      const draggableId = api.findClosestDraggableId(event);
-      if (!draggableId) return;
-      const preDrag = api.tryGetLock(draggableId);
-      if (!preDrag) return;
-
-      window.removeEventListener('mousedown', onInitialMouseDown);
-      startPendingDrag(event, preDrag);
+      unbindRef.current = bindEvent(window, 'mousedown', handleMouseDown);
     },
-    [api, startPendingDrag]
+    [api, cancel, onPending]
   );
 
   React.useLayoutEffect(() => {
-    window.addEventListener('mousedown', onInitialMouseDown);
-    return () => {
-      window.removeEventListener('mousedown', onInitialMouseDown);
-    };
-  }, [onInitialMouseDown]);
+    onIdle();
+    return () => unbindRef.current();
+  }, [onIdle]);
 }

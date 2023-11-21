@@ -69,3 +69,14 @@ export function getCardDetail(id: string): [number, number] {
 export function diffColor(suit1: number, suit2: number): boolean {
   return suit1 % 2 !== suit2 % 2;
 }
+
+export function bindEvent(
+  target: HTMLElement | Window,
+  eventName: string,
+  handler: (e: Event) => void
+) {
+  target.addEventListener(eventName, handler);
+  return function unbind() {
+    target.removeEventListener(eventName, handler);
+  };
+}
